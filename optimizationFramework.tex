@@ -1,0 +1,106 @@
+\documentclass[12pt]{article}
+\usepackage[margin = 1in]{geometry}
+
+%<<<<<<< HEAD
+% Load basic but necessary packages
+\usepackage{amsmath, amsthm, amsfonts, setspace, mathrsfs}
+\usepackage{enumerate}
+\usepackage{enumitem}
+\usepackage{graphicx, subfigure}
+%\usepackage{chemfig}
+%\usepackage{url, tikz}
+
+%\usepackage{hyperref}
+%	\hypersetup{colorlinks=true,
+%				linkcolor=blue,
+%				urlcolor=magenta,
+%				citecolor=orange,
+%				linkbordercolor=lightgray}
+%	\urlstyle{same}
+
+\usepackage{theoremref}
+	
+%=======
+
+%\usepackage{amsmath, amsthm, setspace, theoremref, mathrsfs, enumerate, enumitem, amsfonts, url, tikz, chemfig}  
+
+%>>>>>>> dc17b5dfcce777fa7b6515070cc8c1b8ac513e68
+
+% Chemistry package - allows for notating chemical symbols and formulas
+\usepackage[version=4]{mhchem}
+
+% Glossary package - it is supposed to set up the symbols and abbreviations page(s) (not working yet [10 Apr 201])
+%\usepackage[xindy,toc,ucmark,style=long3colheader,counter=equation]{glossaries}
+%	\makeglossary
+
+\usepackage[backend=bibtex,style=authoryear,maxcitenames=2, natbib=true, labelalpha=true]{biblatex} 	% Use the bibtex backend with the author year citation style (which resembles APA)
+\addbibresource{PhD_Dissertation_Refs.bib}	% The file name of the bibliography
+\addbibresource{optimizationBib.bib} 		% The file name of the bibliography
+
+%%%% Glossary for Symbols and Abbreciations %%%%
+
+% Redefine the way hyperref creates the target for equations
+% So that the glossary links to equation numbers work
+%\renewcommand*\theHequation{\theHchapter.\arabic{equation}}
+
+% Change the glossary headings
+%\renewcommand{\entryname}{Notation}
+%\renewcommand{\descriptionname}{Function Name}
+%\renewcommand{\pagelistname}{Number of Formula}
+
+%\newglossaryentry{M}{name={\ensuremath{M}},
+%					 sort=M,
+%					 description={An index set of the sensors}}
+
+%%%%  		End of Glossary Preamble 		%%%%
+
+% Theorem Commands
+\newtheorem{MyAssum}{}
+\renewcommand{\theMyAssum}{\textbf{A\arabic{MyAssum}}}
+
+\newtheorem*{conjecture}{Conjecture}
+
+% Other Commands
+\newcommand{\hcD}{\widehat{\mathcal{D}}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\deltaOTC}{\delta_{13}C}
+\newcommand{\cM}{\mathcal{M}}
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\setbar}{\text{ }|\text{ }}
+
+% Preamble
+\begin{document}
+	\section*{Preamble}
+	This page is supposed to contain abbreviations, acronyms, and symbols with links to those in text.  Not currently working as of 08 Feb 2019.
+	
+	\par \noindent
+	The following is a list of notation used in the model.
+	\begin{enumerate}
+		\item $F = [0, b_{1}] \times [0, b_{2}]$--The observation field.
+		\item $f:\mathbb{R} \to \mathbb{R}$--The measurement certainty function based on distance to a measured site.
+		\item $\cM$--An index set of the sensors.
+		\item $P$--An index set of the discretized field.
+		\item $G \subseteq F$--The gravel terrain (or other terrain) in which sensors cannot be placed.
+		\item $r$--The minimum distance between sensors
+		\item $\hcD: F \to \mathbb{R}$--The estimated isotope level at a site based on the measurements taken.
+		\item $\cD: F \to \mathbb{R}$--The true isotope level at a site.
+	\end{enumerate}
+	
+	\thispagestyle{empty}
+	
+	%\gls{M} 
+	%\printglossary
+
+% Start sections
+	\newpage
+	
+	\input{sections/overview.tex}
+	\input{sections/sensor_optimization.tex}
+	\input{sections/montecarlo_sim.tex}
+	\input{sections/implementation_notes.tex}
+
+% Bibliography
+\newpage
+\printbibliography[heading=bibintoc]
+
+\end{document}

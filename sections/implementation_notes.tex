@@ -1,0 +1,11 @@
+\section{Some Implementation Notes}
+The workflow for solving the problem looks like:
+\begin{enumerate}
+\item Read in image of the field site
+\item Using colors determine which areas are off limits
+\item Use ellipses to cover the off-limit areas for the reverse convex model
+\item Solve the sensor placement problem 
+\item Using some simulation, determine the collected ``data" by the algorithmically placed sensors
+\item Create model for entire field
+\item Compare to simulated truth
+\end{enumerate}

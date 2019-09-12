@@ -1,0 +1,98 @@
+\section{Sensor Optimization Formulation}
+
+\noindent
+We formulate a nonlinear optimization algorithm to place sensors in the field in order to characterize the gaseous output in a given area. The model captures phenomena intrinsic to the "area" of the specific application and the "sensor" hardware. For instance, it is known that once a sensor's location has been chosen, the sensor can continuously record the concentration of carbon dioxide ([\ce{CO2}]), methane ([\ce{CH4}]), and carbon isotopes of methane ($\delta^{13}$\ce{C-CH4}), and carbon dioxide ($\delta^{13}$C-\ce{CO2}) measurements. Each of these measurements can be used to estimate, with relatively high precision \citep{Christiansen2015}, the isotopic composition at a specific location. That is, if $\hcD_{meas}$ is a function that represents the estimated \textbf{isotope} level after a complete set of measurements, and $\cD$ is a function that represents the true isotope level, then the difference between the two function values at a measured location is small. Hence, we make the following assumption:
+
+\begin{MyAssum}\thlabel{exact}
+Let $x$ be a chosen measurement site. Then $\cD(x) = \hcD(x)$.
+\end{MyAssum}
+
+\textit{We should be able to relax this assumption to say $||\cD(x) - \hcD(x)|| < \epsilon$.}\\
+
+
+\begin{subequations}\label{PreliminaryModel}
+\begin{align}                                               
+\min \ &\sum\limits_{p \in P}\sum\limits_{m \in \cM} \frac{f(x)}{|\cM|} \\
+\text{s.t.} & x_{m} \in F \backslash G, \forall \ m \in \cM, \label{PM:gravelConstraint}\\
+&x \in \cP, \forall \ m, m' \in \cM, m \neq m'. \label{PM:radiusConstraint}
+\end{align}
+\end{subequations}
+General constraints are represented by $x \in \cP$.
+
+There are multiple choices of objectives functions one can use to model the decay in a measurement value as a function of the distance to the specified site. For ease of exposition, we introduce variables $y_{p,m} = x_{m} - X_{p}$, where $x_{m}$ is the location of a sensor and $X_{P}$ is a desired measurement site. Note that this produces an affine constraint in the formulation. 
+
+Consider $f_{1}: \mathbb{R}^{2} \to \mathbb{R}$ defined by $f_{1}(z) = ||z||_{2}^{2}$. Then $f_{1}$ is a convex function. Define $F_{1}: \mathbb{R}^{2\times |\cM|} \times \mathbb{R}^{2 \times |\cM| \times |P|}$ by $F_{1}(x,y) = \sum\limits_{p \in P}\sum\limits_{m \in \cM} \frac{1}{\cM}f_{1}(y_{p,m})$. Then $F_{1}$ is a convex objective function. A similar result occurs if $f_{2}:\mathbb{R}^{2} \to \mathbb{R}$ is defined by $f_{2}(z) = e^{||z||_{2}^{2}}$ and $F_{2}: \mathbb{R}^{2\times |\cM|} \times \mathbb{R}^{2 \times |M| \times |P|}$ is defined by $F_{2}(x,y) = \sum\limits_{p \in P}\sum\limits_{m \in M} \frac{1}{M}f_{2}(y_{p,m})$. 
+
+A common objective function is the \textit{Gaussian}. Let $f_{3}: \mathbb{R}^{2} \to \mathbb{R}$ be defined by $f_{3}(z) = e^{-\frac{||z||^{2}_{2}}{\sigma}}$, where $\sigma > 0$ is a parameter. The Gaussian function $f_{3}$ is a log-concave function; hence, it is a quasiconcave function. Let $F_{3}:\mathbb{R}^{2\times |M|} \times \mathbb{R}^{2 \times |M| \times |P|}$ be defined by $F_{3}(x,y) = \prod\limits_{p \in P}\prod\limits_{m \in M} \frac{1}{M}f_{3}(y_{p,m})$. Then, $F_{3}$ is the product of log-concave functions and is log-concave. Moreover, $-F_{3}$ is quasiconvex.
+
+
+\subsection{A Connection to K-means}
+Formulation \eqref{PreliminaryModel} can be adapted slightly into a special case of K-means. To do so, we introduce binary variables and ``big-M" constraints that model which sensor is closest to each location. In addition, we first assume that $G = \emptyset$ and that $F$ is a convex set. 
+
+\begin{subequations}\label{KMeansModel}
+	\begin{align}                                               
+	\min \ \sum\limits_{p \in P}\sum\limits_{m \in \cM} &\frac{y_{p,m}}{|\cM|} \\
+	\text{s.t.}\  & x_{m} \in F \forall \ m \in \cM, \\
+	&y_{p,m} \geq ||x_{m} - X_{p}||_{2}^{2} - M(1 - z_{p,m}),\\
+	\sum\limits_{m \in \cM} &z_{p,m} = 1,\\
+	&y_{p,m} \geq 0, \forall \ m \in \cM, p \in P,\\
+	&z_{p,m} \in \mathbb{B}, \forall \ m \in \cM, p \in P.
+	\end{align}
+\end{subequations}
+
+\begin{conjecture}\thlabel{KMeansConjecture}
+There exists an optimal solution ($x^{*}, y^{*}, z^{*}$) to \eqref{KMeansModel} such that $x^{*}_{m}$ is the mean of $\{X_{p}\}_{P(m)}$, where $P(m) = \{p \in P : z_{p,m} = 1\}$.\footnote{Maybe we can also show that it is the unique optimal solution. Or analyze that case.}
+\end{conjecture}
+
+In general, $G \neq \emptyset$. Hence, it is possible that the the K-means solution is infeasible. This leads to a \textit{constrained K-means} model. There are examples of constrained K-means models in the literature. For instance, \citep{Wagstaff2001} considers constraints that either ensure two instances are assigned to the same cluster or  prevent two instances from sharing a cluster. \citep{Luo2003} considers a spatially constrained K-means algorithm with applications to image segmentation. Spatial constraints are useful in image segmentation because they require that the clusters are contiguous; in an image, the pixels in each cluster form a connected subset.
+
+To the best of our knowledge,\footnote{Need to increase our knowledge here...} this is the first study of what we call \textit{terrain constrained} K-means: the centroids are constrained away from subsets of the feature space.
+
+In addition, we also propose using alternative distance metrics from the Euclidean norm, as proposed by \citep{Aggarwal2001}.
+
+\subsection{Reverse Convex Programming}
+Due to the constraint \eqref{PM:gravelConstraint}, this optimization will probably be at best a Reverse Convex Program \citep{Hillestad1980}. Further reading to be done at \url{https://link.springer.com/content/pdf/10.1007/BF01442883.pdf}. \cite{Hillestad1980} describe how to identify basic solutions and they also provide a cutting plane algorithm.
+
+If one assumes that the untestable areas $\mathcal{G}$ in the interior of the cite can be modeled by circles, then this can be modeled by $g_{k}(x) = ||x - c^{k}||_{2}^{2} - d^{k} \geq 0$, where $c_{k}$ is the center of the restricted area. Because $g_{k}$ is strictly convex, $g_{k}$ is also strictly quasiconvex. Moreover, $g_{k}$ is continuous so the constraint is a reverse convex constraint. Other restrictions are also possible. For example, an ellipsoidal constraint can be modeled as $g_{k}(x) = ||x - c^{k}||_{E_{k}}^{2} - d^{k} \geq 0$, where $E_{k}$ is a diagonal matrix in $\mathbb{R}^{2}_{++}$ in which its nonzero entries dictate the lengths of the semi-axes. Polyhedral restrictions are not given by reverse convex constraints; however, one can approximate them using strictly convex functions. For instance, given the reverse $L_{1}$-norm constraint $||x - c^{k}||_{1} - d^{k} \geq 0$, one can approximate this constraint by $g_{k}(x) = ||x - c^{k}||_{p}^{p} - (d^{k})^{p} \geq 0$, for some $p > 1$.
+
+Suppose that the restricted area $\mathcal{G}$ is given by multiple ellipsoids centered around point $c_{k}, k = 1,...,K$. Given that $x_{m}$ represents the placement of sensor $m \in \{1,...,M\}$ in the 2-dimensional space, the restricted area can be modeled by multiple reverse convex constraints with convex functions $g_{m,k}: \mathbb{R}^{2M} \to \mathbb{R}$ defined by $g_{m,k}(x) = ||x_{m} - c_{k}||^{2}_{E_{k}} - d_{k}$, where $E_{k} \in \mathbb{R}^{2}_{++}$ is the diagonal matrix defining the ellipsoid semi-axes and $d_{k} \geq 0$. 
+Then, $\mathcal{G} = \{x \in \mathbb{R}^{2M} \setbar g_{m,k}(x) < 0, \text{for some } m \in \{1,...,M\}, k \in \{1,...,K\}\}$.
+
+The optimization problem now has multiple reverse convex constraints:
+\begin{subequations}\label{multipleReverseModel}
+\begin{align}                                               
+\min \ &\sum\limits_{p \in P}\sum\limits_{m \in \cM} \frac{f(x)}{|\cM|} \\
+\text{s.t.} & x_{m} \in F, \forall \ m \in \cM, \label{mR:gravelConstraint}\\
+& g_{m,k}(x) \geq 0, \forall \ m \in \{1,...,M\}, k \in \{1,...,K\}, \\
+&x \in \cP, \forall \ m, m' \in \cM, m \neq m'. \label{mR:radiusConstraint}
+\end{align}
+\end{subequations}
+
+Many reverse convex algorithms are designed for only a single reverse convex constraint (see Tuy other works to cite). It is shown in (Jacobsen Encyclopedia entry) that one can transform a problem with multiple reverse convex constraints into one with a single reverse convex constraint, and we provide details specific to this setting.
+
+Let $s, p_{m,k}, q: \mathbb{R}^{2M} \to \mathbb{R}$, for all $k \in \{1,...,K\}, m \in \{1,...,M\}$, where $s(x) = \sum\limits_{k = 1}^{K}\sum\limits_{m = 1}^{M} g_{m,k}(x)$, $p_{m,k}(x) = s(x) - g_{m,k}(x)$, and $q(x) = \max\limits_{k \in \{1,...,K\}, m \in \{1,...,M\}} p_{m,k}(x)$. Then constraint \eqref{mR:gravelConstraint} is equivalent to the following two constraints with the auxiliary variable $t \in \mathbb{R}$:
+\begin{align*}
+& q(x) - t \leq 0,\\
+& s(x) - t \geq 0,
+\end{align*}
+where the first constraint is a convex constraint and the second constraint is a reverse convex constraint. Thus, if \eqref{multipleReverseModel} is a convex program with multiple additional reverse convex constraints, then \eqref{multipleReverseTransformedModel} is a convex program with a single reverse convex constraint.
+
+\begin{subequations}\label{multipleReverseTransformedModel}
+\begin{align}                                               
+\min \ &\sum\limits_{p \in P}\sum\limits_{m \in \cM} \frac{f(x)}{|\cM|} \\
+\text{s.t.} & x_{m} \in F, \forall \ m \in \cM, \label{mRT:gravelConstraint}\\
+& s(x) - t \leq 0,\\
+& q(x) - t \geq 0,\\
+&x \in \cP, \forall \ m, m' \in \cM, m \neq m'. \label{mRT:radiusConstraint}
+\end{align}
+\end{subequations}
+
+
+Returning to the K-means structure, the $z$ variables indicate whether a sensor is assigned to a location. These variables are binary, but these binary constraints can be expressed with reverse convexity:
+
+\begin{align*}
+&\{z \in \mathbb{B}^{MK}\} = \{z \in \mathbb{R}^{MK}_{+} \setbar h(z) \geq 0\},\\
+&h(z) = \sum\limits_{m = 1}^{M}\sum\limits_{k = 1}^{K} z_{mk}(z_{mk} - 1).
+\end{align*}
+
+Thus, one can adapt $s$ and $q$ to include $h$ as one of the functions along with $g_{mk}$ to create a reverse convex program without integrality constraints.
